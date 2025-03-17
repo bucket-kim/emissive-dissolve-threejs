@@ -2,11 +2,13 @@
 /* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable react/no-unknown-property */
 import * as THREE from "three";
-import { useRef, useMemo } from "react";
+import { useMemo, RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import snoise from "../../noise/snoise.glsl?raw";
+import { isMobileDevice } from "../../../utils/deviceUtils";
 
 interface TorusKnotProps {
+  torusRef: RefObject<THREE.Mesh>;
   controls: any;
   dissolveUniformData: React.MutableRefObject<{
     uEdgeColor: { value: THREE.Color };
@@ -16,15 +18,16 @@ interface TorusKnotProps {
     uEdge: { value: number };
   }>;
   dissolving: boolean;
+  setDissolving: (arg0: boolean) => void;
 }
 
 const TorusKnot = ({
+  torusRef,
   controls,
   dissolveUniformData,
   dissolving,
+  setDissolving,
 }: TorusKnotProps) => {
-  const torusRef = useRef<THREE.Mesh>(null);
-
   // Create geometry
   const torusKnotGeometry = useMemo(
     () => new THREE.TorusKnotGeometry(2.5, 0.8, 140, 140),
@@ -109,18 +112,21 @@ const TorusKnot = ({
 
     if (!torusRef.current) return;
 
-    // Animate position
-    torusRef.current.rotation.y = controls[0].rotationY;
     torusRef.current.position.y = Math.sin(time * 2) * 0.5;
-    torusRef.current.visible = controls[0].meshVisible;
 
-    // Handle auto dissolve animation
     if (controls[0].autoDissolve) {
       const progress = dissolveUniformData.current.uProgress;
       if (dissolving) {
-        progress.value += 0.08;
+        progress.value += isMobileDevice() ? 0.12 : 0.08;
       } else {
-        progress.value -= 0.08;
+        progress.value -= isMobileDevice() ? 0.12 : 0.08;
+      }
+
+      if (progress.value > 14 && dissolving) {
+        setDissolving(false);
+      }
+      if (progress.value < -17 && !dissolving) {
+        setDissolving(true);
       }
     }
   });

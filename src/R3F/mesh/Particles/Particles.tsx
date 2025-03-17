@@ -9,6 +9,7 @@ import snoise from "../../noise/snoise.glsl?raw";
 import { isMobileDevice } from "../../../utils/deviceUtils";
 
 interface ParticleSystemProps {
+  particleMeshRef: RefObject<THREE.Points>;
   geometry: THREE.BufferGeometry;
   controls: any;
   dissolveUniformData: RefObject<{
@@ -31,17 +32,17 @@ interface ParticleAttributes {
 }
 
 const Particles = ({
+  particleMeshRef,
   geometry,
   controls,
   dissolveUniformData,
 }: ParticleSystemProps) => {
-  const particleMeshRef = useRef<THREE.Points>(null);
   const particleAttRef = useRef<ParticleAttributes | null>(null);
 
   // Particle data
   const particleData = useRef({
     particleSpeedFactor: 0.02,
-    velocityFactor: { x: 2.5, y: 2 },
+    velocityFactor: { x: 2.5, y: 2, z: 1.5 },
     waveAmplitude: 0,
   });
 
@@ -212,6 +213,7 @@ const Particles = ({
   ) => {
     const posx = particleCurrPosArr[idx * 3 + 0];
     const posy = particleCurrPosArr[idx * 3 + 1];
+    const posz = particleCurrPosArr[idx * 3 + 2];
 
     let xwave1 = Math.sin(posy * 2) * (0.8 + waveAmplitude);
     let ywave1 = Math.sin(posx * 2) * (0.6 + waveAmplitude);
@@ -225,10 +227,15 @@ const Particles = ({
     let xwave4 = Math.sin(posy * 3) * (0.8 + waveAmplitude);
     let ywave4 = Math.sin(posx * 7) * (0.6 + waveAmplitude);
 
+    let zwave1 = Math.sin(posx * 3) * (0.5 + waveAmplitude);
+    let zwave2 = Math.sin(posx * 2) * (0.4 + waveAmplitude);
+    let zwave3 = Math.sin(posz * 4) * (0.3 + waveAmplitude);
+
     let xwave = xwave1 + xwave2 + xwave3 + xwave4;
     let ywave = ywave1 + ywave2 + ywave3 + ywave4;
+    let zwave = zwave1 + zwave2 + zwave3;
 
-    return { xwave, ywave };
+    return { xwave, ywave, zwave };
   };
 
   const updateVelocity = (
@@ -242,8 +249,9 @@ const Particles = ({
 
     vx *= particleData.current.velocityFactor.x;
     vy *= particleData.current.velocityFactor.y;
+    vz *= particleData.current.velocityFactor.z || 1.0;
 
-    let { xwave, ywave } = calculateWaveOffset(
+    let { xwave, ywave, zwave } = calculateWaveOffset(
       idx,
       particleCurrPosArr,
       particleData.current.waveAmplitude
@@ -251,6 +259,7 @@ const Particles = ({
 
     vx += xwave;
     vy += ywave;
+    vz += zwave;
 
     vx *= Math.abs(particleData.current.particleSpeedFactor);
     vy *= Math.abs(particleData.current.particleSpeedFactor);
@@ -360,9 +369,7 @@ const Particles = ({
     if (!particleMeshRef.current) return;
 
     // Update position to match the torus
-    particleMeshRef.current.rotation.y = controls[0].rotationY;
     particleMeshRef.current.position.y = Math.sin(time * 2) * 0.5;
-    particleMeshRef.current.visible = controls[0].particleVisible;
 
     // Update particles
     updateParticleAttributes();

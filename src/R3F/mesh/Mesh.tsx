@@ -3,7 +3,7 @@
 /* eslint-disable react/no-unknown-property */
 /* eslint-disable react/react-in-jsx-scope */
 import * as THREE from "three";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, RefObject, useMemo, useRef, useState } from "react";
 import { isMobileDevice } from "../../utils/deviceUtils";
 import { useControls, folder } from "leva";
 import BloomEffect from "../Bloom/BloomEffect";
@@ -12,6 +12,9 @@ import TorusKnot from "./TorusMesh/TorusMesh";
 
 const Mesh = () => {
   const [dissolving, setDissolving] = useState<boolean>(true);
+
+  const torusRef = useRef<THREE.Mesh>(null);
+  const particleMeshRef = useRef<THREE.Points>(null);
 
   // Shared uniform data between both components
   const dissolveUniformData = useRef({
@@ -46,11 +49,21 @@ const Mesh = () => {
         min: -(Math.PI * 2),
         max: Math.PI * 2,
         step: 0.01,
+        onChange: (value) => {
+          if (!torusRef.current || !particleMeshRef.current) return;
+          torusRef.current.rotation.y = value;
+          particleMeshRef.current.rotation.y = value;
+        },
       },
     }),
     dissolve: folder({
       meshVisible: {
         value: true,
+        onChange: (value) => {
+          if (!torusRef.current || !particleMeshRef.current) return;
+          torusRef.current.visible = value;
+          particleMeshRef.current.visible = value;
+        },
       },
       dissolveProgress: {
         value: dissolveUniformData.current.uProgress.value,
@@ -63,12 +76,6 @@ const Mesh = () => {
       },
       autoDissolve: {
         value: false,
-        onChange: (value) => {
-          // Reset dissolving state if auto is turned off
-          if (!value) {
-            setDissolving(true);
-          }
-        },
       },
       edgeWidth: {
         value: dissolveUniformData.current.uEdge.value,
@@ -152,34 +159,17 @@ const Mesh = () => {
     }),
   }));
 
-  // Effect for auto-dissolve toggling
-  useEffect(() => {
-    // if (!controls[0].autoDissolve) return;
-
-    const checkDissolveProgress = () => {
-      const progress = dissolveUniformData.current.uProgress.value;
-
-      if (progress > 14 && dissolving) {
-        setDissolving(false);
-      }
-
-      if (progress < -17 && !dissolving) {
-        setDissolving(true);
-      }
-    };
-
-    const interval = setInterval(checkDissolveProgress, 100);
-    return () => clearInterval(interval);
-  }, [controls, dissolving]);
-
   return (
     <Fragment>
       <TorusKnot
+        torusRef={torusRef as RefObject<THREE.Mesh>}
         controls={controls}
         dissolveUniformData={dissolveUniformData}
         dissolving={dissolving}
+        setDissolving={setDissolving}
       />
       <Particles
+        particleMeshRef={particleMeshRef as RefObject<THREE.Points>}
         geometry={torusKnotGeometry}
         controls={controls}
         dissolveUniformData={dissolveUniformData}
