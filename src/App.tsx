@@ -3,7 +3,7 @@ import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import Mesh from "./R3F/Mesh/Mesh";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { isMobileDevice } from "./utils/deviceUtils";
 
 const scale = isMobileDevice() ? 0.7 : 1;
@@ -37,8 +37,10 @@ function App() {
         outputColorSpace: THREE.SRGBColorSpace,
         pixelRatio: window.devicePixelRatio * scale,
       }}>
-      <OrbitControls />
-      <Mesh />
+      <OrbitControls enableDamping dampingFactor={0.05} />
+      <Suspense fallback={null}>
+        <Mesh />
+      </Suspense>
       <Environment files={envMapArr} background={false} />
     </Canvas>
   );
