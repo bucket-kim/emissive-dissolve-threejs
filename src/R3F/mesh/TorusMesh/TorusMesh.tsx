@@ -5,7 +5,6 @@ import * as THREE from "three";
 import { useMemo, RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import snoise from "../../noise/snoise.glsl?raw";
-import { isMobileDevice } from "../../../utils/deviceUtils";
 
 interface TorusKnotProps {
   torusRef: RefObject<THREE.Mesh>;
@@ -29,15 +28,23 @@ const TorusKnot = ({
   setDissolving,
 }: TorusKnotProps) => {
   // Create geometry
+
+  // const { nodes } = useGLTF("/models/circle.glb");
+
   const torusKnotGeometry = useMemo(
     () => new THREE.TorusKnotGeometry(2.5, 0.8, 140, 140),
     []
   );
 
+  // const torusKnotGeometry = useMemo(
+  //   () => new THREE.IcosahedronGeometry(4, 2),
+  //   []
+  // );
+
   // Create material
   const dissolveMaterial = useMemo(() => {
     const material = new THREE.MeshPhysicalMaterial({
-      color: "#cecece",
+      color: "#bebebe",
       metalness: 2,
       roughness: 0,
       side: THREE.DoubleSide,
@@ -113,13 +120,14 @@ const TorusKnot = ({
     if (!torusRef.current) return;
 
     torusRef.current.position.y = Math.sin(time * 2) * 0.5;
+    torusRef.current.rotation.y = time * 0.35;
 
     if (controls[0].autoDissolve) {
       const progress = dissolveUniformData.current.uProgress;
       if (dissolving) {
-        progress.value += isMobileDevice() ? 0.12 : 0.08;
+        progress.value += 0.08;
       } else {
-        progress.value -= isMobileDevice() ? 0.12 : 0.08;
+        progress.value -= 0.08;
       }
 
       if (progress.value > 14 && dissolving) {

@@ -4,18 +4,17 @@ import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import Mesh from "./R3F/Mesh/Mesh";
 import { Suspense, useEffect } from "react";
-import { isMobileDevice } from "./utils/deviceUtils";
 
-const scale = isMobileDevice() ? 0.7 : 1;
+const scale = 1;
 
 function App() {
   const envMapArr = [
-    "./envMap/px.png",
-    "./envMap/nx.png",
-    "./envMap/py.png",
-    "./envMap/ny.png",
-    "./envMap/pz.png",
-    "./envMap/nz.png",
+    "./envMap002/px.png",
+    "./envMap002/nx.png",
+    "./envMap002/py.png",
+    "./envMap002/ny.png",
+    "./envMap002/pz.png",
+    "./envMap002/nz.png",
   ];
 
   useEffect(() => {

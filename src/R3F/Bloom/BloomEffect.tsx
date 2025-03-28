@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/react-in-jsx-scope */
 import { FC, useMemo, useEffect } from "react";
-import { useThree, useFrame } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { isMobileDevice } from "../../utils/deviceUtils";
+import { Environment } from "@react-three/drei";
 
 interface BloomEffectProps {
   controls: any;
@@ -17,12 +17,12 @@ const BloomEffect: FC<BloomEffectProps> = ({ controls }) => {
   const cubeTexture = useMemo(() => {
     const loader = new THREE.CubeTextureLoader();
     return loader.load([
-      "/envMap/px.png",
-      "/envMap/nx.png",
-      "/envMap/py.png",
-      "/envMap/ny.png",
-      "/envMap/pz.png",
-      "/envMap/nz.png",
+      "/envMap002/px.png",
+      "/envMap002/nx.png",
+      "/envMap002/py.png",
+      "/envMap002/ny.png",
+      "/envMap002/pz.png",
+      "/envMap002/nz.png",
     ]);
   }, []);
 
@@ -35,20 +35,31 @@ const BloomEffect: FC<BloomEffectProps> = ({ controls }) => {
   }, [scene, cubeTexture]);
 
   // Make sure the scene background is set properly for rendering
-  useFrame(() => {
-    scene.background = cubeTexture;
-  });
 
   return (
-    <EffectComposer multisampling={isMobileDevice() ? 0 : 4}>
-      <Bloom
-        intensity={controls[0].bloomStrength}
-        luminanceThreshold={0.2}
-        luminanceSmoothing={0.025}
-        mipmapBlur={true}
-        radius={isMobileDevice() ? 0.2 : 0.4}
+    <>
+      <Environment
+        files={[
+          "/envMap002/px.png",
+          "/envMap002/nx.png",
+          "/envMap002/py.png",
+          "/envMap002/ny.png",
+          "/envMap002/pz.png",
+          "/envMap002/nz.png",
+        ]}
+        background
+        blur={0.3}
       />
-    </EffectComposer>
+      <EffectComposer multisampling={4}>
+        <Bloom
+          intensity={controls[0].bloomStrength}
+          luminanceThreshold={0.2}
+          luminanceSmoothing={0.025}
+          mipmapBlur={true}
+          radius={0.4}
+        />
+      </EffectComposer>
+    </>
   );
 };
 

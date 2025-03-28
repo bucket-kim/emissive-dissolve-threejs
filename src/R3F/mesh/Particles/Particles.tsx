@@ -6,7 +6,6 @@ import * as THREE from "three";
 import { useRef, useMemo, useEffect, RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import snoise from "../../noise/snoise.glsl?raw";
-import { isMobileDevice } from "../../../utils/deviceUtils";
 
 interface ParticleSystemProps {
   particleMeshRef: RefObject<THREE.Points>;
@@ -64,7 +63,7 @@ const Particles = ({
     uAmp: dissolveUniformData.current.uAmp,
     uFreq: dissolveUniformData.current.uFreq,
     uBaseSize: {
-      value: isMobileDevice() ? 40 : 80,
+      value: 80,
     },
     uColor: {
       value: dissolveUniformData.current.uEdgeColor.value,
@@ -370,6 +369,7 @@ const Particles = ({
 
     // Update position to match the torus
     particleMeshRef.current.position.y = Math.sin(time * 2) * 0.5;
+    particleMeshRef.current.rotation.y = time * 0.35;
 
     // Update particles
     updateParticleAttributes();

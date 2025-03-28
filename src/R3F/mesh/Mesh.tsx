@@ -4,7 +4,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import * as THREE from "three";
 import { Fragment, RefObject, useMemo, useRef, useState } from "react";
-import { isMobileDevice } from "../../utils/deviceUtils";
+
 import { useControls, folder } from "leva";
 import BloomEffect from "../Bloom/BloomEffect";
 import Particles from "./Particles/Particles";
@@ -35,11 +35,16 @@ const Mesh = () => {
     },
   });
 
-  // Shared geometry for both the mesh and particles
   const torusKnotGeometry = useMemo(
     () => new THREE.TorusKnotGeometry(2.5, 0.8, 140, 140),
     []
   );
+
+  // Shared geometry for both the mesh and particles
+  // const torusKnotGeometry = useMemo(
+  //   () => new THREE.IcosahedronGeometry(4, 2),
+  //   []
+  // );
 
   // Setup controls with Leva
   const controls = useControls(() => ({
@@ -119,7 +124,7 @@ const Mesh = () => {
         value: true,
       },
       particleBaseSize: {
-        value: isMobileDevice() ? 40 : 80,
+        value: 80,
         min: 10.0,
         max: 100,
         step: 0.01,
@@ -145,7 +150,7 @@ const Mesh = () => {
     }),
     bloom: folder({
       bloomStrength: {
-        value: isMobileDevice() ? 6.0 : 8.0,
+        value: 8,
         min: 1,
         max: 20,
         step: 0.01,
